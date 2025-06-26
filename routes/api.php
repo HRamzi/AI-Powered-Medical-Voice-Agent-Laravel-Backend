@@ -34,6 +34,9 @@ Route::middleware('auth.clerk')->group(function () {
         ]);
     });
     
+    // Sessions endpoint for creating medical consultation sessions
+    Route::post('/sessions', [\App\Http\Controllers\Api\SessionController::class, 'store']);
+    
 });
 
 // Public routes (no authentication required)
