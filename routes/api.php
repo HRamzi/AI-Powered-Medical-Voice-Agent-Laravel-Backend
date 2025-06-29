@@ -56,4 +56,46 @@ Route::get('/health', function () {
         'service' => 'AI Medical Voice Agent API',
         'timestamp' => now()
     ]);
+});
+
+
+
+// Vapi webhook endpoint (public - Vapi will call this)
+Route::post('/webhook/vapi', function (Request $request) {
+    $message = $request->input('message');
+    
+    switch ($message['type']) {
+        case 'status-update':
+            \Log::info("Call {$message['call']['id']}: {$message['call']['status']}");
+            break;
+            
+        case 'transcript':
+            \Log::info("{$message['role']}: {$message['transcript']}");
+            // You could store real-time transcripts here
+            break;
+            
+        case 'function-call':
+            // Handle custom function calls from Vapi
+            return handleVapiFunctionCall($message);
+    }
+    
+    return response()->json(['received' => true]);
 }); 
+
+function handleVapiFunctionCall($message) {
+    $functionCall = $message['functionCall'];
+    
+    switch ($functionCall['name']) {
+        case 'lookup_patient_history':
+            // Example: Look up patient medical history
+            $patientData = [
+                'patientId' => $functionCall['parameters']['patientId'], 
+                'lastVisit' => '2024-01-15',
+                'conditions' => ['hypertension', 'diabetes']
+            ];
+            return response()->json(['result' => $patientData]);
+            
+        default:
+            return response()->json(['error' => 'Unknown function'], 400);
+    }
+} 

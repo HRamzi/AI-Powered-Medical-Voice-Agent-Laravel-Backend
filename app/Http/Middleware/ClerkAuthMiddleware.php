@@ -38,7 +38,7 @@ class ClerkAuthMiddleware
             // Set the authenticated user for this request
             auth()->setUser($user);
             
-            return $next($request);
+        return $next($request);
             
         } catch (Exception $e) {
             return response()->json([

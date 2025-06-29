@@ -121,7 +121,16 @@ class DoctorController extends Controller
             $notes = $request->input('notes');
             $doctorAgents = $this->getAIDoctorAgents();
 
-            // Make OpenAI API call to suggest doctors based on symptoms
+            // Temporary: Return mock suggestions instead of calling OpenAI
+            // TODO: Configure OpenAI API key and enable AI suggestions
+            
+            // Simple keyword-based suggestion logic
+            $suggestedDoctors = $this->getMockSuggestions($notes, $doctorAgents);
+            
+            return response()->json($suggestedDoctors);
+
+            /* 
+            // Original OpenAI implementation (commented out until API key is configured)
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
                 'Content-Type' => 'application/json',
@@ -153,9 +162,60 @@ class DoctorController extends Controller
             }
 
             return response()->json(['error' => 'Failed to get doctor suggestions'], 500);
+            */
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Mock suggestion logic based on keywords
+     * Returns appropriate doctors based on symptom keywords
+     */
+    private function getMockSuggestions($notes, $doctorAgents)
+    {
+        $notes = strtolower($notes);
+        $suggestions = [];
+
+        // Always include General Physician as first suggestion
+        $suggestions[] = $doctorAgents[0]; // General Physician
+
+        // Keyword-based suggestions
+        if (str_contains($notes, 'skin') || str_contains($notes, 'rash') || str_contains($notes, 'acne')) {
+            $suggestions[] = $doctorAgents[2]; // Dermatologist
+        }
+        
+        if (str_contains($notes, 'heart') || str_contains($notes, 'chest') || str_contains($notes, 'blood pressure')) {
+            $suggestions[] = $doctorAgents[5]; // Cardiologist
+        }
+        
+        if (str_contains($notes, 'child') || str_contains($notes, 'baby') || str_contains($notes, 'kid')) {
+            $suggestions[] = $doctorAgents[1]; // Pediatrician
+        }
+        
+        if (str_contains($notes, 'mental') || str_contains($notes, 'stress') || str_contains($notes, 'anxiety') || str_contains($notes, 'depression')) {
+            $suggestions[] = $doctorAgents[3]; // Psychologist
+        }
+        
+        if (str_contains($notes, 'diet') || str_contains($notes, 'weight') || str_contains($notes, 'nutrition')) {
+            $suggestions[] = $doctorAgents[4]; // Nutritionist
+        }
+        
+        if (str_contains($notes, 'ear') || str_contains($notes, 'nose') || str_contains($notes, 'throat') || str_contains($notes, 'sinus')) {
+            $suggestions[] = $doctorAgents[6]; // ENT Specialist
+        }
+        
+        if (str_contains($notes, 'bone') || str_contains($notes, 'joint') || str_contains($notes, 'muscle') || str_contains($notes, 'pain')) {
+            $suggestions[] = $doctorAgents[7]; // Orthopedic
+        }
+        
+        if (str_contains($notes, 'teeth') || str_contains($notes, 'dental') || str_contains($notes, 'tooth')) {
+            $suggestions[] = $doctorAgents[9]; // Dentist
+        }
+
+        // Remove duplicates and limit to 3 suggestions
+        $suggestions = array_unique($suggestions, SORT_REGULAR);
+        return array_slice($suggestions, 0, 3);
     }
 } 
