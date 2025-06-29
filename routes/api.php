@@ -17,6 +17,19 @@ use Illuminate\Support\Facades\Route;
 // Protected routes that require Clerk authentication
 Route::middleware('auth.clerk')->group(function () {
     
+    // User management (matches frontend: POST /api/users)
+    Route::post('/users', [\App\Http\Controllers\Api\UserController::class, 'store']);
+    
+    // Session management (matches frontend: GET/POST /api/session-chat)
+    Route::post('/session-chat', [\App\Http\Controllers\Api\SessionController::class, 'store']);
+    Route::get('/session-chat', [\App\Http\Controllers\Api\SessionController::class, 'show']);
+    
+    // Doctor suggestions (matches frontend: POST /api/suggest-doctors)
+    Route::post('/suggest-doctors', [\App\Http\Controllers\Api\DoctorController::class, 'suggest']);
+    
+    // Medical report generation (matches frontend: POST /api/medical-report)
+    Route::post('/medical-report', [\App\Http\Controllers\Api\ReportController::class, 'generate']);
+    
     // Get authenticated user profile
     Route::get('/profile', function (Request $request) {
         return response()->json([
@@ -33,9 +46,6 @@ Route::middleware('auth.clerk')->group(function () {
             'message' => 'AI Medical Voice Agent - Authentication Working!'
         ]);
     });
-    
-    // Sessions endpoint for creating medical consultation sessions
-    Route::post('/sessions', [\App\Http\Controllers\Api\SessionController::class, 'store']);
     
 });
 
